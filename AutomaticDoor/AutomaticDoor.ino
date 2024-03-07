@@ -1,6 +1,9 @@
 #include <Stepper.h>
+#include <Bridge.h>
+#include <BridgeServer.h>
+#include <BridgeClient.h>
 
-const int SECONDS_BEFORE_CLOSING = 5;
+const int SECONDS_BEFORE_CLOSING = 50;
 const int STEPS_PER_REVOLUTION = 2038;
 const int LED = 2;
 const int SENSOR = 2;
@@ -11,6 +14,8 @@ bool didOpen = false;
 bool didClose = false;
 
 int openTicks = 0;
+
+BridgeServer server;
 
 // https://arduino.stackexchange.com/a/70257
 // In order for the motor to be able to go in the opposite direction, we have to reverse the port mapping for
@@ -23,10 +28,33 @@ void setup() {
   pinMode(SENSOR, INPUT);
   
   myStepper.setSpeed(5);
+  
+  // Setup the web server
+  Bridge.begin();
+  server.listenOnLocalhost();
+  server.begin();
 }
 
-
 void loop() {
+  // doorLoop();
+  serverLoop();
+  //delay(100);
+}
+
+void serverLoop() {
+  BridgeClient client = server.accept();
+  if (!client) {
+    Serial.println("No client attempting connection.");
+    return;
+  }
+
+  Serial.println("accepting connection");
+  client.print("<h1>test</h1>");
+  client.stop();
+  delay(50);
+}
+
+void doorLoop() {
   if (shouldOpen) {
     Serial.println("Opening door");
     myStepper.step(STEPS_PER_REVOLUTION * 0.25);
@@ -62,6 +90,5 @@ void loop() {
           }
       }
   }
-
-  delay(1000);
 }
+
