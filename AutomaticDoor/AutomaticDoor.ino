@@ -36,9 +36,10 @@ void setup() {
 }
 
 void loop() {
-  // doorLoop();
-  serverLoop();
-  //delay(100);
+  doorLoop();
+  // The server doesn't work at the moment
+  // serverLoop();
+  delay(100);
 }
 
 void serverLoop() {
