@@ -29,10 +29,13 @@ void setup() {
   
   stepper.setSpeed(5);
   
-  // Setup the web server
-  Bridge.begin();
-  server.listenOnLocalhost();
-  server.begin();
+  serverSetup();
+}
+
+void serverSetup() {
+    Bridge.begin();
+    server.listenOnLocalhost();
+    server.begin();
 }
 
 void loop() {
