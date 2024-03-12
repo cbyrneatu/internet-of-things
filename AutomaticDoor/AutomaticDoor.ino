@@ -20,14 +20,14 @@ BridgeServer server;
 // https://arduino.stackexchange.com/a/70257
 // In order for the motor to be able to go in the opposite direction, we have to reverse the port mapping for
 // IN2 (typically 9) and IN3 (typically 10).
-Stepper myStepper(STEPS_PER_REVOLUTION, 8, 10, 9, 11);
+Stepper stepper(STEPS_PER_REVOLUTION, 8, 10, 9, 11);
 
 void setup() {
   Serial.begin(9600);
   
   pinMode(SENSOR, INPUT);
   
-  myStepper.setSpeed(5);
+  stepper.setSpeed(5);
   
   // Setup the web server
   Bridge.begin();
@@ -58,7 +58,7 @@ void serverLoop() {
 void doorLoop() {
   if (shouldOpen) {
     Serial.println("Opening door");
-    myStepper.step(STEPS_PER_REVOLUTION * 0.25);
+    stepper.step(STEPS_PER_REVOLUTION * 0.25);
     shouldOpen = false;
     didOpen = true;
     didClose = false;
@@ -67,7 +67,7 @@ void doorLoop() {
   if (shouldClose) {
     Serial.println("Closing door");
 
-    myStepper.step(-(STEPS_PER_REVOLUTION * 0.25));
+    stepper.step(-(STEPS_PER_REVOLUTION * 0.25));
     shouldClose = false;
     didClose = true;
     didOpen = false;
