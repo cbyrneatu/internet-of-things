@@ -5,7 +5,6 @@
 
 const int SECONDS_BEFORE_CLOSING = 50;
 const int STEPS_PER_REVOLUTION = 2038;
-const int LED = 2;
 const int SENSOR = 2;
 
 bool shouldOpen = true;
