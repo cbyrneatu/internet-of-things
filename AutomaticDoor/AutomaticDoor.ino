@@ -1,12 +1,19 @@
 #include <Stepper.h>
 #include <Bridge.h>
-#include <BridgeServer.h>
-#include <BridgeClient.h>
+
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPL4dmV73TW7"
+#define BLYNK_TEMPLATE_NAME "AutomaticDoor"
+#define BLYNK_AUTH_TOKEN "KT67LoCd_HdfaT82M7-uFjzYSkazSO7H"
+
+#include <BlynkSimpleYun.h>
 
 const int SECONDS_BEFORE_CLOSING = 50;
 const int STEPS_PER_REVOLUTION = 2038;
+const int LED = 2;
 const int SENSOR = 2;
 
+bool enabled = true;
 bool shouldOpen = true;
 bool shouldClose = false;
 bool didOpen = false;
@@ -14,12 +21,17 @@ bool didClose = false;
 
 int openTicks = 0;
 
-BridgeServer server;
-
 // https://arduino.stackexchange.com/a/70257
 // In order for the motor to be able to go in the opposite direction, we have to reverse the port mapping for
 // IN2 (typically 9) and IN3 (typically 10).
 Stepper stepper(STEPS_PER_REVOLUTION, 8, 10, 9, 11);
+
+// V0 is used for enabling/disabling the lock functionality.
+BLYNK_WRITE(V0)
+{
+  int pinValue = param.asInt();
+  enabled = pinValue == 1;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -28,38 +40,25 @@ void setup() {
   
   stepper.setSpeed(5);
   
-  serverSetup();
-}
-
-void serverSetup() {
-    Bridge.begin();
-    server.listenOnLocalhost();
-    server.begin();
+  // Setup the web server
+  Bridge.begin();
+  Blynk.begin(BLYNK_AUTH_TOKEN);
 }
 
 void loop() {
+  Blynk.run();
   doorLoop();
-  // The server doesn't work at the moment
-  // serverLoop();
   delay(100);
 }
 
-void serverLoop() {
-  BridgeClient client = server.accept();
-  if (!client) {
-    Serial.println("No client attempting connection.");
+void doorLoop() {
+  if (!enabled) {
     return;
   }
 
-  Serial.println("accepting connection");
-  client.print("<h1>test</h1>");
-  client.stop();
-  delay(50);
-}
-
-void doorLoop() {
   if (shouldOpen) {
     Serial.println("Opening door");
+    Blynk.virtualWrite(V1, 1);
     stepper.step(STEPS_PER_REVOLUTION * 0.25);
     shouldOpen = false;
     didOpen = true;
